@@ -5,7 +5,7 @@
 **C.  Customize the HTML user interface for your customer’s application. The user interface should include the shop name, the product names, and the names of the parts.**
 
 In file 'mainscreen.html' I added a style sheet that occupies lines 14-88.
-
+`
  <style>
         .custom-theme {
             color: #2c3e50;
@@ -81,35 +81,35 @@ In file 'mainscreen.html' I added a style sheet that occupies lines 14-88.
             background-color: #2B6CB0;
         }
     </style>
-
+`
 Line 90 I changed the title to 'Cole's Custom Keyboards'
-<h1>Cole's Custom Keyboards</h1>
+`<h1>Cole's Custom Keyboards</h1>`
 Line 94 I changed the header to 'Cole's Custom Keyboards'
-<h1>Cole's Custom Keyboards</h1>
+`<h1>Cole's Custom Keyboards</h1>`
 Line 97 I changed the header to 'Keyboard Components'
-<h2>Keyboard components</h2>
+`<h2>Keyboard components</h2>`
 Line 132 I changed the header to 'Pre-Built Keyboards'
-<h2>Pre-built Keyboards</h2>
+`<h2>Pre-built Keyboards</h2>`
 Line 8 I added reference to google fonts to allow my font in the style
-<link href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+`<link href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">`
 
 **D.  Add an “About” page to the application to describe your chosen customer’s company to web viewers and include navigation to and from the “About” page and the main screen.**
 
 In mainscreen.html 
 Line 96 added a button to navigate to about.html
-<a href="/about" class="btn btn-info">About Cole's Custom Keyboards</a>
+`<a href="/about" class="btn btn-info">About Cole's Custom Keyboards</a>`
 
 In MainScreenControllerr.java
 Line 56 added a controller to enable access to about.html
-
+`
     @GetMapping("/about")
     public String about() {
         return "about";
     }
-
+`
 NEW about.html
 Line 1-130 added a new about us page using the same styling as the mainscreen but with different structure for 'Our Story' and 'Our Products'.
-<!DOCTYPE html>
+`<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
@@ -238,21 +238,21 @@ Line 1-130 added a new about us page using the same styling as the mainscreen bu
 </div>
 
 </body>
-</html>
+</html>`
 
 **E.  Add a sample inventory appropriate for your chosen store to the application. You should have five parts and five products in your sample inventory and should not overwrite existing data in the database.**
 
 In BootStrapData.java
 Line 3-7 added import statements for InhousePartForm
-
+`
 import com.example.demo.domain.InhousePart;
 import com.example.demo.domain.OutsourcedPart;
 import com.example.demo.domain.Part;
 import com.example.demo.domain.Product;
 import com.example.demo.repositories.InhousePartRepository;
-
+`
 Line 27-38 inserted repo for inhouse parts
-
+`
 @Component
 public class BootStrapData implements CommandLineRunner {
 
@@ -266,10 +266,10 @@ public class BootStrapData implements CommandLineRunner {
         this.productRepository = productRepository;
         this.inhousePartRepository = inhousePartRepository;
         this.outsourcedPartRepository=outsourcedPartRepository;
-    }
+    }`
 Line 43-136 Added my parts to the part repository, both inhouse and outsourced.
 
- @Override
+ `@Override
     public void run(String... args) throws Exception {
         List<InhousePart> inhouseParts = (List<InhousePart>) inhousePartRepository.findAll();
 
@@ -363,9 +363,9 @@ Line 43-136 Added my parts to the part repository, both inhouse and outsourced.
         outsourcedParts=(List<OutsourcedPart>) outsourcedPartRepository.findAll();
         for(OutsourcedPart part:outsourcedParts){
             System.out.println(part.getName()+" "+part.getCompanyName());
-        }
+        }`
 Line 138-148 added my products to the product repository
-
+`
         Product full_keyboard= new Product("Full-size Keyboard",200.00,8);
         Product seventy_keyboard= new Product("70% Keyboard",140.00,4);
         Product ergo_keyboard= new Product("Ergonomic Keyboard",150.00,9);
@@ -377,7 +377,7 @@ Line 138-148 added my products to the product repository
         productRepository.save(ergo_keyboard);
         productRepository.save(split_keyboard);
         productRepository.save(planck_keyboard);
-
+`
 F.  Add a “Buy Now” button to your product list. Your “Buy Now” button must meet each of the following parameters:
 •  The “Buy Now” button must be next to the buttons that update and delete products.
 •  The button should decrement the inventory of that product by one. It should not affect the inventory of any of the associated parts.
