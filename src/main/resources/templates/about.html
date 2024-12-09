@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <style>
+    .custom-theme {
+      color: #2c3e50;
+      background-color: #f5f5f5;
+      font-family: "Crimson Text", "Times New Roman", serif;
+      font-size: 1.1em;
+      line-height: 1.6;
+      padding: 2em;
+    }
+
+    .custom-theme h1 {
+      font-family: "Playfair Display", "Times New Roman", serif;
+      color: #2c3e50;
+      line-height: 1.2;
+      font-size: 2.4em;
+      margin-bottom: 0.5em;
+    }
+
+    .custom-theme h2 {
+      font-family: "Playfair Display", "Times New Roman", serif;
+      color: #2c3e50;
+      font-size: 1.8em;
+      margin: 1em 0;
+    }
+
+    .custom-theme .section {
+      background: white;
+      padding: 2em;
+      margin: 2em 0;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .custom-theme .btn-primary {
+      background-color: #2c5282;
+      border-color: #2c5282;
+      margin: 0.5em 0;
+    }
+
+    .custom-theme .btn-primary:hover {
+      background-color: #2B6CB0;
+      border-color: #2B6CB0;
+    }
+
+    .custom-theme .navigation {
+      background: white;
+      padding: 1em;
+      margin-bottom: 2em;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .custom-theme .product-card {
+      background: white;
+      padding: 1.5em;
+      margin: 1em 0;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .custom-theme .product-img {
+      width: 100%;
+      height: auto;
+      border-radius: 4px;
+      margin-bottom: 1em;
+    }
+  </style>
+
+  <title>About Us - Cole's Custom Keyboards</title>
+</head>
+<body>
+<div class="container custom-theme">
+  <!-- Navigation -->
+  <div class="navigation">
+    <a href="mainscreen" class="btn btn-primary">Home</a>
+    <a href="about" class="btn btn-primary">About Us</a>
+  </div>
+
+  <h1>About Cole's Custom Keyboards</h1>
+  <hr>
+
+  <!-- Our Story Section -->
+  <div class="section">
+    <h2>Our Story</h2>
+    <p>Founded in 2024, Cole's Custom Keyboards emerged from a deep-rooted passion for creating exceptional typing experiences. Our journey began with a simple belief: every keyboard should be a masterpiece of craftsmanship and precision. As enthusiasts ourselves, we understand that a keyboard is more than just a tool—it's an extension of your creativity and productivity.</p>
+    <p>What sets us apart is our unwavering commitment to premium quality and attention to detail. Each keyboard and component we offer is carefully selected and tested to meet our exacting standards. From the smooth action of our switches to the precise fit of our keycaps, we ensure every element contributes to a superior typing experience. Our dedication to quality extends beyond our products to our customer service, where we take pride in helping each client find their perfect keyboard configuration.</p>
+    <p>At Cole's Custom Keyboards, we believe that premium craftsmanship shouldn't be a luxury—it should be the standard. This philosophy drives us to continuously source the finest components and maintain the highest quality control standards in the industry.</p>
+  </div>
+
+  <!-- Our Products Section -->
+  <div class="section">
+    <h2>Our Products</h2>
+    <div class="row">
+      <!-- Custom Keyboards -->
+      <div class="col-md-6">
+        <div class="product-card">
+          <img src="/api/placeholder/400/300" alt="Custom Keyboards" class="product-img">
+          <h3>Premium Pre-built Keyboards</h3>
+          <p>Our pre-built keyboards represent the pinnacle of mechanical keyboard craftsmanship. Each keyboard is meticulously assembled by our expert team, using only the finest materials and components available. We take pride in our rigorous quality control process, where every keyboard undergoes extensive testing to ensure perfect functionality, consistent feel, and flawless finish.</p>
+          <p>From our signature series featuring premium aluminum cases to our specially curated switch selections, each keyboard is built to deliver an exceptional typing experience that will last for years to come. We don't just build keyboards; we create instruments of productivity and enjoyment that reflect our passion for perfection.</p>
+        </div>
+      </div>
+      <!-- Components -->
+      <div class="col-md-6">
+        <div class="product-card">
+          <img src="/api/placeholder/400/300" alt="Keyboard Components" class="product-img">
+          <h3>Premium Components</h3>
+          <p>We understand that exceptional keyboards start with exceptional components. That's why we carefully source and stock only the highest quality parts in the industry. Our component selection includes premium switches known for their smooth action and reliability, high-grade keycaps crafted from the finest materials, and precision-engineered stabilizers that ensure consistent feel across every key.</p>
+          <p>Each component in our inventory is hand-selected and tested to meet our strict quality standards. Whether you're building your own keyboard or upgrading an existing one, our premium components provide the foundation for an unparalleled typing experience.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
