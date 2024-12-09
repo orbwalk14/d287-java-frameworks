@@ -4,6 +4,7 @@ import com.example.demo.validators.ValidDeletePart;
 
 import javax.persistence.*;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.Max;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -28,6 +29,11 @@ public abstract class Part implements Serializable {
     double price;
     @Min(value = 0, message = "Inventory value must be positive")
     int inv;
+    @Min(value = 0, message = "Minimum inventory value must be positive")
+    int minInv;
+    @Min(value = 0, message = "Maximum inventory must be positive")
+    @Max(value = 200, message = "Maximum inventory value must fall within set maximum")
+    int maxInv;
 
     @ManyToMany
     @JoinTable(name="product_part", joinColumns = @JoinColumn(name="part_id"),
@@ -35,19 +41,24 @@ public abstract class Part implements Serializable {
     Set<Product> products= new HashSet<>();
 
     public Part() {
+
     }
 
     public Part(String name, double price, int inv) {
         this.name = name;
         this.price = price;
         this.inv = inv;
+        this.minInv = 0; //default minimum inventory
+        this.maxInv = 100; //default maximum inventory
     }
 
-    public Part(long id, String name, double price, int inv) {
+    public Part(long id, String name, double price, int inv, int minInv, int maxInv) {
         this.id = id;
         this.name = name;
         this.price = price;
         this.inv = inv;
+        this.minInv = minInv; //default min inventory
+        this.maxInv = maxInv; //default max inventory
     }
 
     public long getId() {
@@ -90,9 +101,18 @@ public abstract class Part implements Serializable {
         this.products = products;
     }
 
+    public int getMinInv() { return minInv;}
+
+    public void setMinInv(int minInv) { this.minInv = minInv;}
+
+    public int getMaxInv() { return maxInv;}
+
+    public void setMaxInv(int maxInv) { this.maxInv = maxInv;}
+
     public String toString(){
         return this.name;
     }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -101,6 +121,14 @@ public abstract class Part implements Serializable {
         Part part = (Part) o;
 
         return id == part.id;
+    }
+
+    public void validateLimits() {
+        if (this.inv < this.minInv) {
+            throw new RuntimeException("This value falls below required minimum.");
+        } else if (this.inv > this.maxInv) {
+            throw new RuntimeException("This value exceeds the allowed maximum.");
+        }
     }
 
     @Override
