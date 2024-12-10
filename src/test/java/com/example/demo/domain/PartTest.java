@@ -184,6 +184,8 @@ class PartTest {
         assertEquals(max_inv,partOut.getMaxInv());
     }
 
+
+
     @Test
     void setMaxInv() {
         int max_inv=195;
