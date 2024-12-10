@@ -286,7 +286,8 @@ public class BootStrapData implements CommandLineRunner {
 ```
 Line 43-136 Added my parts to the part repository, both inhouse and outsourced.
 
-```@Override
+```
+@Override
     public void run(String... args) throws Exception {
         List<InhousePart> inhouseParts = (List<InhousePart>) inhousePartRepository.findAll();
 
@@ -396,24 +397,443 @@ Line 138-148 added my products to the product repository
         productRepository.save(split_keyboard);
         productRepository.save(planck_keyboard);
 ```
-F.  Add a “Buy Now” button to your product list. Your “Buy Now” button must meet each of the following parameters:
-•  The “Buy Now” button must be next to the buttons that update and delete products.
-•  The button should decrement the inventory of that product by one. It should not affect the inventory of any of the associated parts.
-•  Display a message that indicates the success or failure of a purchase.
+**F.  Add a “Buy Now” button to your product list. Your “Buy Now” button must meet each of the following parameters:**
+**•  The “Buy Now” button must be next to the buttons that update and delete products.**
+File: mainscreen.html
+Line 161 - Created a 'buy now' button next to the buttons that update and delete products.
+```
+ <a th:href="@{/buyProduct(productID=${tempProduct.id})}" class="btn btn-primary btn-sm mb-3">Buy</a>
+```
+**•  The button should decrement the inventory of that product by one. It should not affect the inventory of any of the associated parts.**
+New File: BuyProductController.java
+Line 1-56 - New controller and logic to handling the inventory changes associated with purchasing products. This will also return the view associated with the actions. (buysuccess/buyfailure).
+```
+package com.example.demo.controllers;
 
+import com.example.demo.domain.Part;
+import com.example.demo.domain.Product;
+import com.example.demo.repositories.ProductRepository;
+import com.example.demo.service.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.validation.Valid;
+import java.util.List;
+import java.util.Optional;
+
+@Controller
+public class BuyProductController {
+    @Autowired
+    private ProductRepository productRepository;
+
+    @GetMapping("/buyProduct")
+    @Transactional
+    public String buyProduct(@RequestParam("productID") Long theId, Model theModel) {
+        try {
+            // Attempt to find the product in the database
+            Optional<Product> productToBuy = productRepository.findById(theId);
+
+            // Check if the product exists
+            if (!productToBuy.isPresent()) {
+                theModel.addAttribute("errorMessage", "Product not found in catalog");
+                return "confirmbuyfailure";  // Return failure view if product not found
+            }
+            // Get the actual product from the Optional
+            Product product = productToBuy.get();
+            // Check if the product is in stock
+            if (product.getInv() <= 0) {
+                theModel.addAttribute("errorMessage", "Product is out of stock");
+                return "confirmbuyfailure"; // Return failure view if out of stock
+            }
+            // Decrement the inventory count
+            product.setInv(product.getInv() - 1);
+            // Save the updated inventory count to the database
+            productRepository.save(product);
+
+            // Add the purchased product to the model for the success view
+            theModel.addAttribute("product", product);
+            return "confirmbuysuccess"; // Return success view
+
+        } catch (Exception e) {
+            // Handle any unexpected errors during the purchase process
+            theModel.addAttribute("errorMessage", "An error occurred while processing your purchase");
+            return "confirmbuyfailure"; // Return failure view if exception occurs
+        }
+    }
+}
+```
+**•  Display a message that indicates the success or failure of a purchase.**
+New File: confirmbuyfailure.html
+Line 1-11 - New html document to fulfill the requirements of indicating a purchase failure upon purchase failure.
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Unable to fulfill purchase.</title>
+</head>
+<body>
+<h1>We are unable to complete your purchase. Check to see if the product is out of stock. Please refresh your page or contact us for further assistance.</h1>
+<a href="http://localhost:8080/">Back to Home</a>
+</body>
+</html>
+```
+New File: confirmbuysuccess.html
+Line 1-11 - New html document to fulfill the requirements of indicating a purchase success upon purchase success.
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Purchase Successful!</title>
+</head>
+<body>
+<h1> Your purchase was successful! Thank you for your support!</h1>
+<a href="http://localhost:8080/">Back to Home</a>
+</body>
+</html>
+```
 G.  Modify the parts to track maximum and minimum inventory by doing the following:
 •  Add additional fields to the part entity for maximum and minimum inventory.
-•  Modify the sample inventory to include the maximum and minimum fields.
-•  Add to the InhousePartForm and OutsourcedPartForm forms additional text inputs for the inventory so the user can set the maximum and minimum values.
-•  Rename the file the persistent storage is saved to.
-•  Modify the code to enforce that the inventory is between or at the minimum and maximum value.
+File: Part.java
+Line 31-35 - Added fields to part entity for  minimum and maximum inventory values.
+```
+    @Min(value = 0, message = "Minimum inventory value must be positive")
+    int minInv;
+    @Min(value = 0, message = "Maximum inventory must be positive")
+    @Max(value = 200, message = "Maximum inventory value must fall within set maximum")
+    int maxInv;
+```
+Line 38-57 - Assigned default inventory values to the constructors.
+```
+    public Part() {
 
-H.  Add validation for between or at the maximum and minimum fields. The validation must include the following:
-•  Display error messages for low inventory when adding and updating parts if the inventory is less than the minimum number of parts.
-•  Display error messages for low inventory when adding and updating products lowers the part inventory below the minimum.
-•  Display error messages when adding and updating parts if the inventory is greater than the maximum.
+    }
 
-I.  Add at least two unit tests for the maximum and minimum fields to the PartTest class in the test package.
+    public Part(String name, double price, int inv) {
+        this.name = name;
+        this.price = price;
+        this.inv = inv;
+        this.minInv = 0; //default minimum inventory
+        this.maxInv = 100; //default maximum inventory
+    }
 
-J.  Remove the class files for any unused validators in order to clean your code.
+    public Part(long id, String name, double price, int inv, int minInv, int maxInv) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.inv = inv;
+        this.minInv = minInv; //default min inventory
+        this.maxInv = maxInv; //default max inventory
+    }
 
+```
+Line 99-105 - getters and setters for min/maxinv
+```
+    public int getMinInv() { return minInv;}
+
+    public void setMinInv(int minInv) { this.minInv = minInv;}
+
+    public int getMaxInv() { return maxInv;}
+
+    public void setMaxInv(int maxInv) { this.maxInv = maxInv;}
+```
+File: InhousePart.java
+Line 17-19 - set default inventory values for inhouse parts.
+```
+    public InhousePart() {
+        this.minInv = 0;
+        this.maxInv = 100;
+
+    }
+```
+
+File: OutsourcedPart.java
+Line 17-19 - set default values for outsourced parts. 
+```
+    public OutsourcedPart() {
+        this.minInv = 0;
+        this.maxInv = 100;
+    }
+```
+**•  Modify the sample inventory to include the maximum and minimum fields.
+File: BootStrapData.java
+Line 51 & 52 - set min and max inventory variable.
+```
+ihp1.setMinInv(1);
+ihp1.setMaxInv(100);
+```
+Line 65 & 66 - set min and max inventory variable.
+```
+ihp2.setMinInv(1);
+ihp2.setMaxInv(100);
+```
+Line 88 & 89 - set min and max inventory variable.
+```
+op1.setMinInv(1);
+op1.setMaxInv(100);
+```
+Line 105 & 106 - set min and max inventory variable.
+```
+op2.setMinInv(1);
+op2.setMaxInv(100);
+```
+Line 122 & 123 - set min and max inventory variable.
+```
+op3.setMinInv(1);
+op3.setMaxInv(100);
+```
+**•  Add to the InhousePartForm and OutsourcedPartForm forms additional text inputs for the inventory so the user can set the maximum and minimum values.**
+File: InhousePartForm.html
+Line 24-28 - set inventory ranges for fields in inhousepartform
+```
+<p><input type="text" th:field="*{minInv}" placeholder="Minimum Inventory" class="form-control mb-4 col-4"/></p>
+    <p th:if="${#fields.hasErrors('minInv')}" th:errors="*{minInv}">Minimum Inventory Error</p>
+
+<p><input type="text" th:field="*{maxInv}" placeholder="Maximum Inventory" class="form-control mb-4 col-4"/></p>
+    <p th:if="${#fields.hasErrors('maxInv')}" th:errors="*{maxInv}">Maximum Inventory Error</p>
+```
+File: OutsourcedPartForm.html
+Line 25-29 - set inventory ranges for fields in OutsourcedPartForm
+```
+<p><input type="text" th:field="*{minInv}" placeholder="Minimum Inventory" class="form-control mb-4 col-4"/></p>
+    <p th:if="${#fields.hasErrors('minInv')}" th:errors="*{minInv}">Minimum Inventory Error</p>
+
+<p><input type="text" th:field="*{maxInv}" placeholder="Maximum Inventory" class="form-control mb-4 col-4"/></p>
+    <p th:if="${#fields.hasErrors('maxInv')}" th:errors="*{maxInv}">Maximum Inventory Error</p>
+```
+**•  Rename the file the persistent storage is saved to.**
+File: application.properties
+Line 6 - change storage to 'cole-kb-db2'
+```
+spring.datasource.url=jdbc:h2:file:~/cole-kb-db2
+```
+**•  Modify the code to enforce that the inventory is between or at the minimum and maximum value.**
+File: Part.java
+Line 126 - created validateLimits method to ensure inventory values fall within the specified range. Will throw erros in cases where inventory values are greater than max or less then minimum accepted values.
+```
+    public void validateLimits() {
+        if (this.inv < this.minInv) {
+            throw new RuntimeException("This value falls below required minimum.");
+        } else if (this.inv > this.maxInv) {
+            throw new RuntimeException("This value exceeds the allowed maximum.");
+        }
+    }
+```
+File: PartServiceImpl
+Line 59 - Implemented the previous method to validate limits before saving changes.
+```
+ thePart.validateLimits();
+```
+File: OutsourcedPartServiceImpl.java
+Line - 52 - Implemented the previous method to validate limits
+```
+thePart.validateLimits();
+```
+File: InhousePartServiceImpl.java
+Line - 54 - Implemented the previous method to validate limits
+```
+thePart.validateLimits();
+```
+**H.  Add validation for between or at the maximum and minimum fields. The validation must include the following:**
+**•  Display error messages for low inventory when adding and updating parts if the inventory is less than the minimum number of parts.**
+**•  Display error messages for low inventory when adding and updating products lowers the part inventory below the minimum.**
+New File: ValidMinimum
+Line 1-16 - Display error message in cases where inventory value under minimum.
+```
+package com.example.demo.validators;
+import javax.validation.Constraint;
+import javax.validation.Payload;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Constraint(validatedBy = {MinimumValidator.class})
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ValidMinimum {
+    String message() default "Part count falls below set minimum";
+    Class<?> [] groups() default {};
+    Class<? extends Payload> [] payload() default {};
+}
+```
+New File: MinimumValidator
+Line 1-20 - Logic beind message being displayed in cases where inventory value over maximum.
+```
+package com.example.demo.validators;
+import com.example.demo.domain.Part;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
+
+public class MinimumValidator implements ConstraintValidator<ValidMinimum, Part> {
+    @Autowired
+    private ApplicationContext context;
+    public static ApplicationContext myContext;
+
+    @Override
+    public void initialize(ValidMinimum constraintAnnotation) {
+        ConstraintValidator.super.initialize(constraintAnnotation);
+    }
+
+    @Override
+    public boolean isValid(Part part, ConstraintValidatorContext constraintValidatorContext) {
+        return part.getInv() > part.getMinInv();
+    }
+
+}
+```
+File: Part.java
+Line 4 - import statement.
+```
+import com.example.demo.validators.ValidMinimum;
+```
+Line 13 - implement validMinimum
+```
+@ValidMinimum
+```
+File: EnufPartsValidator.java
+Line 37-40 - validation logic to check for inventory value and decrement when an item is purchased, implemented an error message in cases where its needed.
+```
+if (p.getInv() < (product.getInv() - myProduct.getInv())) {
+constraintValidatorContext.disableDefaultConstraintViolation();
+constraintValidatorContext.buildConstraintViolationWithTemplate("Insufficient inventory for part: " + p.getName()).addConstraintViolation();
+return false;
+```
+File: Product.java
+Line 3- Import ValidEnufParts
+```
+import com.example.demo.validators.ValidEnufParts;
+```
+Line 15- Implement new validation to product class.
+```
+@ValidEnufParts
+```
+New File: ValidMaximum
+Line 1-24 - Display error mesage in cases where inventory value over maximum.
+```
+package com.example.demo.validators;
+
+import com.example.demo.validators.MaximumValidator;
+
+import javax.validation.Constraint;
+import javax.validation.Payload;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/**
+ *
+ *
+ *
+ *
+ */
+@Constraint(validatedBy = {MaximumValidator.class})
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ValidMaximum {
+    String message() default "Part count is above set maximum";
+    Class<?> [] groups() default {};
+    Class<? extends Payload> [] payload() default {};
+}
+```
+New File: MaximumValidator
+Line 1-20 - Logic beind message being displayed in cases where inventory value over maximum.
+```
+package com.example.demo.validators;
+import com.example.demo.domain.Part;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
+
+public class MaximumValidator implements ConstraintValidator<ValidMaximum, Part> {
+    @Autowired
+    private ApplicationContext context;
+    public static ApplicationContext myContext;
+
+    @Override
+    public void initialize(ValidMaximum constraintAnnotation) {
+        ConstraintValidator.super.initialize(constraintAnnotation);
+    }
+
+    @Override
+    public boolean isValid(Part part, ConstraintValidatorContext constraintValidatorContext) {
+        return part.getInv() <= part.getMaxInv();
+    }
+}
+```
+File: Part.java
+Line 12 - Implement ValidMaximum
+```
+@ValidMaximum
+```
+ File:InhousePartForm.html 
+ Line 35-39 - Display errors as messages
+ ```
+    <div th:if="${#fields.hasErrors()}">
+        <ul>
+            <li th:each="err : ${#fields.allErrors()}" th:text="${err}" class="error"/>
+        </ul>
+    </div>
+ ```
+ File:OursourcedPartForm.html
+ Line 33-37 - Display errors as messages.
+ ```
+    <div th:if="${#fields.hasErrors()}">
+        <ul>
+            <li th:each="err : ${#fields.allErrors()}" th:text="${err}" class="error"/>
+        </ul>
+    </div>
+ ```
+**I.  Add at least two unit tests for the maximum and minimum fields to the PartTest class in the test package.**
+File: PartTest.java
+Line 160-194 -Added unit test for getters and setters ans for checking minimum inventory values following similar guidelines to the tests above.
+```
+    @Test
+    void getMinInv() {
+        int min_inv=5;
+        partIn.setMinInv(min_inv);
+        assertEquals(min_inv,partIn.getMinInv());
+        partOut.setMinInv(min_inv);
+        assertEquals(min_inv,partOut.getMinInv());
+    }
+
+    @Test
+    void setMinInv() {
+        int min_inv=5;
+        partIn.setMinInv(min_inv);
+        assertEquals(min_inv,partIn.getMinInv());
+        partOut.setMinInv(min_inv);
+        assertEquals(min_inv,partOut.getMinInv());
+    }
+
+    @Test
+    void getMaxInv() {
+        int max_inv=195;
+        partIn.setMaxInv(max_inv);
+        assertEquals(max_inv,partIn.getMaxInv());
+        partOut.setMaxInv(max_inv);
+        assertEquals(max_inv,partOut.getMaxInv());
+    }
+
+    @Test
+    void setMaxInv() {
+        int max_inv=195;
+        partIn.setMaxInv(max_inv);
+        assertEquals(max_inv,partIn.getMaxInv());
+        partOut.setMaxInv(max_inv);
+        assertEquals(max_inv,partOut.getMaxInv());
+    }
+```
+**J.  Remove the class files for any unused validators in order to clean your code.**
+- Deleted unused class files (DeletePathValidator.java, ValidDeletePart.java)
